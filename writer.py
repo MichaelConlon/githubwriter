@@ -170,7 +170,7 @@ def make_git_commit(past_date):
             'GIT_COMMITTER_DATE': f'{date_str} 12:00:00',
             **dict(os.environ)
         }
-        
+
         # Add all changes
         subprocess.run(['git', 'add', '.'], check=True)
         
