@@ -187,15 +187,16 @@ def make_git_commit(past_date):
 def print_letter(alphabet, index, past_date):
     for i in range(len(alphabet[index])):
         for j in range(len(alphabet[index][i])):
-            if alphabet[index][i][j] == 1:
-                past_date += timedelta(days=1)
-                print(f"{past_date.strftime('%Y-%m-%d')}", end=" ")
-                make_git_commit(past_date)
-            else:
-                past_date += timedelta(days=1)
-                print(f"{past_date.strftime('%Y-%m-%d')}", end=" ")
-                make_git_commit(past_date)
-        print("character line")
+          if j == 0:
+               past_date = print_space(past_date)
+          if alphabet[index][i][j] == 1:
+               past_date += timedelta(days=1)
+               print(f"{past_date.strftime('%Y-%m-%d')}", end=" ")
+               make_git_commit(past_date)
+          else:
+               past_date += timedelta(days=1)
+          if (j == len(alphabet[index][i]) - 1):
+               past_date = print_space(past_date)
     return past_date
 
 def print_space(past_date):
@@ -203,7 +204,6 @@ def print_space(past_date):
         past_date += timedelta(days=1)
         print(f"{past_date.strftime('%Y-%m-%d')}", end=" ")
         make_git_commit(past_date)
-    print("space line")
     return past_date
 
 def validate_input(text):
@@ -222,7 +222,13 @@ def validate_input(text):
 def print_word(word, past_date):
     # Convert letters to indices (a=0, b=1, etc)
     indices = [ord(c) - ord('a') for c in word]
-    
+                
+    past_date = print_space(past_date)
+    past_date = print_space(past_date)
+    past_date = print_space(past_date)
+    past_date = print_space(past_date)
+    past_date = print_space(past_date)
+    past_date = print_space(past_date)
     for i in range(len(indices)):
         past_date = print_letter(alphabet, indices[i], past_date)
         if i < len(indices) - 1:
