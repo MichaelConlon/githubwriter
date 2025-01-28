@@ -163,6 +163,12 @@ alphabet = [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w,
 
 def make_git_commit(past_date):
     try:
+        # Touch a file with the date if it doesn't exist
+        contribution_file = 'contribution.txt'
+        if not os.path.exists(contribution_file):
+            with open(contribution_file, 'w') as f:
+                f.write(past_date.strftime('%Y-%m-%d'))
+     
         date_str = past_date.strftime('%Y-%m-%d')
         # Set the GIT_AUTHOR_DATE and GIT_COMMITTER_DATE environment variables
         env = {
@@ -188,22 +194,23 @@ def print_letter(alphabet, index, past_date):
     for i in range(len(alphabet[index])):
         for j in range(len(alphabet[index][i])):
           if j == 0:
-               past_date = print_space(past_date)
-          if alphabet[index][i][j] == 1:
+               # increment by 1 at beginning of each row because words are 5 characters long and a row is 7
                past_date += timedelta(days=1)
-               print(f"{past_date.strftime('%Y-%m-%d')}", end=" ")
+          if alphabet[index][i][j] == 1:
+               #print(f"{past_date.strftime('%Y-%m-%d')}", end="\n")
                make_git_commit(past_date)
+               past_date += timedelta(days=1)
           else:
                past_date += timedelta(days=1)
           if (j == len(alphabet[index][i]) - 1):
-               past_date = print_space(past_date)
+               # increment by 7 at end of each row because a row is 7 characters long
+               past_date += timedelta(days=1)
     return past_date
 
+#Really just increasing the date by 7 days 
 def print_space(past_date):
     for i in range(7):
         past_date += timedelta(days=1)
-        print(f"{past_date.strftime('%Y-%m-%d')}", end=" ")
-        make_git_commit(past_date)
     return past_date
 
 def validate_input(text):
@@ -238,7 +245,12 @@ if __name__ == "__main__":
     # Get date from 370 days ago
     today = datetime.now()
     past_date = today - timedelta(days=371)
-    print(f"371 days ago was: {past_date.strftime('%Y-%m-%d')}")
+    
+    # Adjust to the next Sunday
+    days_until_sunday = (6 - past_date.weekday()) % 7  # 6 represents Sunday
+    past_date += timedelta(days=days_until_sunday)
+    
+    print(f"Starting from Sunday: {past_date.strftime('%Y-%m-%d')}")
 
     if len(sys.argv) != 2:
         print("Usage: python writer.py <word>")
