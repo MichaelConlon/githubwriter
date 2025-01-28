@@ -163,11 +163,10 @@ alphabet = [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w,
 
 def make_git_commit(past_date):
     try:
-        # Touch a file with the date if it doesn't exist
+        # Write the date to the contribution file
         contribution_file = 'contribution.txt'
-        if not os.path.exists(contribution_file):
-            with open(contribution_file, 'w') as f:
-                f.write(past_date.strftime('%Y-%m-%d'))
+        with open(contribution_file, 'w') as f:
+            f.write(past_date.strftime('%Y-%m-%d'))
      
         date_str = past_date.strftime('%Y-%m-%d')
         # Set the GIT_AUTHOR_DATE and GIT_COMMITTER_DATE environment variables
