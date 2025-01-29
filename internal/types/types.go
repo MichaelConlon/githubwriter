@@ -6,6 +6,7 @@ type Config struct {
 	Text        string
 	OffsetLines int
 	DryRun      bool
+	Year        int
 }
 
 type Letter [5][5]int

@@ -15,10 +15,10 @@ func main() {
 	cfg := &types.Config{}
 
 	// Define the mode flag
-	flag.StringVar(&cfg.Mode, "mode", "", "Operation mode (required)")
-	flag.StringVar(&cfg.Text, "text", "", "text (required if write mode selected)")
-	flag.IntVar(&cfg.OffsetLines, "offset", 0, "number of lines to offset the text in your git activity tracker")
-	flag.BoolVar(&cfg.DryRun, "dryrun", false, "print the resulting git activity as ascii in the terminal")
+	flag.StringVar(&cfg.Mode, "mode", "", "Operation mode: text, work")
+	flag.StringVar(&cfg.Text, "text", "", "text mode only - text to be printed in the activity tracker (8 letter max)")
+	flag.IntVar(&cfg.OffsetLines, "offset", 0, "text mode only - number of lines to offset the text in your git activity tracker")
+	flag.BoolVar(&cfg.DryRun, "dryrun", false, "run the code without creating any commits. This will only print result that would have been commited")
 
 	// Parse command line arguments
 	flag.Parse()
