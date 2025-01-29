@@ -1,11 +1,11 @@
 package textWriter
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"time"
 
+	system "github.com/MichaelConlon/githubwriter/internal/system"
 	types "github.com/MichaelConlon/githubwriter/internal/types"
 )
 
@@ -223,11 +223,6 @@ var (
 	alphabet = [26]types.Letter{a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z}
 )
 
-func commit(commitDate time.Time) {
-	// stub to be implemented later
-	fmt.Println("commit called")
-}
-
 // Print the characters to the terminal
 // Formatted to represent the git activity tracker
 func drawActivity(offset int, text string) {
@@ -295,12 +290,15 @@ func writeLetter(char byte, commitDate time.Time, dryrun bool) time.Time {
 				if dryrun {
 					fmt.Printf("%c: %s\n", char, commitDate.Format("2006-01-02"))
 				} else {
-					commit(commitDate)
+					system.Commit(commitDate)
 				}
 				commitDate = commitDate.AddDate(0, 0, 1) // move date forward
 			}
 		}
 		commitDate = commitDate.AddDate(0, 0, 1) // space at bottom = increment date
+	}
+	if dryrun {
+		fmt.Println()
 	}
 	return commitDate
 }
@@ -316,38 +314,56 @@ func writeWord(offsetLines int, text string, commitDate time.Time, dryrun bool) 
 	for i := 0; i < len(text); i++ {
 		commitDate = writeLetter(text[i], commitDate, dryrun)
 		commitDate = writeSpace(commitDate)
-		fmt.Println()
 	}
+}
+
+func handleFlags(cfg *types.Config) bool {
+
+	hasErrs := false
+
+	// Check if text exists
+	if cfg.Text == "" {
+		fmt.Print("Error: text is required")
+		hasErrs = true
+
+	}
+
+	// Check for valid characters
+	for _, char := range cfg.Text {
+		if char < 'a' || char > 'z' {
+			fmt.Printf("Error: invalid character '%c', only lowercase letters a-z are allowed\n", char)
+			hasErrs = true
+		}
+	}
+
+	// check length
+	if len(cfg.Text) > 8 {
+		fmt.Printf("Error: text must be 8 characters or less, got %d\n", len(cfg.Text))
+		hasErrs = true
+	}
+
+	// make sure year is valid (positive int)
+	if cfg.Year < 0 {
+		fmt.Printf("Error: year must be a positive integer, got %d\n", cfg.Year)
+		hasErrs = true
+	}
+
+	return hasErrs
 }
 
 // Entry Point
 // Handle flags specific to the write mode
-func Write(cfg *types.Config) {
-	if cfg.Mode != "" {
-		fmt.Printf("write mode: '%s'\n", cfg.Mode)
-	}
+func Text(cfg *types.Config) {
 
-	// Check flags for valid values
-	// refactor with error object later
-	if cfg.Text == "" {
-		fmt.Println("Error: text is required")
-		flag.Usage()
-		os.Exit(1)
-	}
-	if len(cfg.Text) > 8 {
-		fmt.Printf("Error: text must be 8 characters or less, got %d\n", len(cfg.Text))
-		os.Exit(1)
-	}
-	if cfg.Year < 0 {
-		fmt.Printf("Error: year must be a positive integer, got %d\n", cfg.Year)
+	if handleFlags(cfg) {
 		os.Exit(1)
 	}
 
 	var commitDate time.Time
-	if cfg.Year != 0 { // get year from args
+	if cfg.Year != 0 { // year arg is present - set to year passed in
 		commitDate = time.Date(cfg.Year, 1, 1, 0, 0, 0, 0, time.Local)
 
-	} else { //get begining of default tracker range
+	} else { // get begining of default tracker range
 		today := time.Now()
 		commitDate = today.AddDate(0, 0, -371) // -371 days (53 weeks * 7 days)
 	}

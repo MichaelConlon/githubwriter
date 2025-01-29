@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	textWriter "github.com/MichaelConlon/githubwriter/internal"
+	mode "github.com/MichaelConlon/githubwriter/internal/mode"
 	types "github.com/MichaelConlon/githubwriter/internal/types"
 )
 
@@ -36,7 +36,7 @@ func main() {
 	switch cfg.Mode {
 	case "write":
 		fmt.Println("Write mode selected")
-		textWriter.Write(cfg)
+		mode.Text(cfg)
 	case "delete":
 		fmt.Println("Delete mode selected")
 	default:
