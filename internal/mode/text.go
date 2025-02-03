@@ -1,6 +1,7 @@
-package textWriter
+package mode
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -275,9 +276,21 @@ func writeSpace(commitDate time.Time) time.Time {
 	return commitDate
 }
 
+// create a generic commit object with commit date
+func createTextCommit(commitDate time.Time) types.Commit {
+	commit := types.Commit{
+		Date:    commitDate.Format("2006-01-02"),
+		Message: fmt.Sprintf("contribution: %s", commitDate.Format("2006-01-02")),
+		Files:   []string{"contribution.txt"},
+		Ticket:  "",
+	}
+	return commit
+}
+
 // take a character and convert it to index in the alphabet array
 // print/commit the corresponding pixels
 func writeLetter(char byte, commitDate time.Time, dryrun bool) time.Time {
+
 	idx := int(char - 'a')
 	letterArray := alphabet[idx]
 
@@ -290,7 +303,7 @@ func writeLetter(char byte, commitDate time.Time, dryrun bool) time.Time {
 				if dryrun {
 					fmt.Printf("%c: %s\n", char, commitDate.Format("2006-01-02"))
 				} else {
-					system.Commit(commitDate)
+					system.Commit(createTextCommit(commitDate))
 				}
 				commitDate = commitDate.AddDate(0, 0, 1) // move date forward
 			}
@@ -317,51 +330,46 @@ func writeWord(offsetLines int, text string, commitDate time.Time, dryrun bool) 
 	}
 }
 
-func handleFlags(cfg *types.Config) bool {
+// handle the text flags
+func handleTextFlags(args types.TextArgs) bool {
 
-	hasErrs := false
+	valid := true
 
 	// Check if text exists
-	if cfg.Text == "" {
+	if args.Text == "" {
 		fmt.Print("Error: text is required")
-		hasErrs = true
-
+		valid = false
 	}
 
 	// Check for valid characters
-	for _, char := range cfg.Text {
+	for _, char := range args.Text {
 		if char < 'a' || char > 'z' {
 			fmt.Printf("Error: invalid character '%c', only lowercase letters a-z are allowed\n", char)
-			hasErrs = true
+			valid = false
 		}
 	}
 
 	// check length
-	if len(cfg.Text) > 8 {
-		fmt.Printf("Error: text must be 8 characters or less, got %d\n", len(cfg.Text))
-		hasErrs = true
+	if len(args.Text) > 8 {
+		fmt.Printf("Error: text must be 8 characters or less, got %d\n", len(args.Text))
+		valid = false
 	}
 
 	// make sure year is valid (positive int)
-	if cfg.Year < 0 {
-		fmt.Printf("Error: year must be a positive integer, got %d\n", cfg.Year)
-		hasErrs = true
+	if args.Year < 0 {
+		fmt.Printf("Error: year must be a positive integer, got %d\n", args.Year)
+		valid = false
 	}
 
-	return hasErrs
+	return valid
 }
 
-// Entry Point
-// Handle flags specific to the write mode
-func Text(cfg *types.Config) {
-
-	if handleFlags(cfg) {
-		os.Exit(1)
-	}
-
+// find the first commit date
+// Do some date math to find first sunday of the year or 53 weeks ago
+func findFirstCommitDate(args *types.TextArgs) time.Time {
 	var commitDate time.Time
-	if cfg.Year != 0 { // year arg is present - set to year passed in
-		commitDate = time.Date(cfg.Year, 1, 1, 0, 0, 0, 0, time.Local)
+	if args.Year != 0 { // year arg is present - set to year passed in
+		commitDate = time.Date(args.Year, 1, 1, 0, 0, 0, 0, time.Local)
 
 	} else { // get begining of default tracker range
 		today := time.Now()
@@ -372,10 +380,31 @@ func Text(cfg *types.Config) {
 	daysUntilSunday := (7 - int(commitDate.Weekday())) % 7
 	commitDate = commitDate.AddDate(0, 0, daysUntilSunday)
 
-	// Visually represent what will be printed on the git activity tracker
-	if cfg.DryRun {
-		drawActivity(cfg.OffsetLines, cfg.Text)
+	return commitDate
+}
+
+// Entry Point
+// Handle flags specific to the write mode
+func Text(args types.TextArgs, dryrun bool) {
+
+	if !handleTextFlags(args) {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	// Create file if not exists
+	err := system.WriteFile("contribution.txt", "")
+	if err != nil {
+		fmt.Printf("Error: failed to create contribution file: %s\n", err)
+		os.Exit(1)
+	}
+
+	commitDate := findFirstCommitDate(&args)
+
+	// Visually represent git activity tracker in the terminal output
+	if dryrun {
+		drawActivity(args.OffsetLines, args.Text)
 	}
 	// Always run this, if its a dry run then we're printing out the commit dates
-	writeWord(cfg.OffsetLines, cfg.Text, commitDate, cfg.DryRun)
+	writeWord(args.OffsetLines, args.Text, commitDate, dryrun)
 }

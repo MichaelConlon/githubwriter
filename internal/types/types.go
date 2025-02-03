@@ -1,12 +1,32 @@
-package config
+package types
 
 // CMD args
 type Config struct {
-	Mode        string
+	Mode     string
+	DryRun   bool
+	TextArgs TextArgs
+	WorkArgs WorkArgs
+}
+
+type TextArgs struct {
+	Year        int
 	Text        string
 	OffsetLines int
-	DryRun      bool
-	Year        int
+}
+
+type WorkArgs struct {
+	Date       string
+	Ticket     string
+	Message    string
+	Extensions string
+	NumFiles   int
+}
+
+type Commit struct {
+	Date    string
+	Ticket  string
+	Message string
+	Files   []string
 }
 
 type Letter [5][5]int

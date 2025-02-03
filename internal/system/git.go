@@ -4,30 +4,27 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"time"
+
+	"github.com/MichaelConlon/githubwriter/internal/types"
 )
 
-func Commit(commitDate time.Time) error {
-	// Write date to contribution file
-	dateStr := commitDate.Format("2006-01-02")
-	if err := os.WriteFile("contribution.txt", []byte(dateStr), 0644); err != nil {
-		return fmt.Errorf("failed to write contribution file: %w", err)
-	}
-
+func Commit(commit types.Commit) error {
 	// Set Git environment variables
 	env := append(os.Environ(),
-		fmt.Sprintf("GIT_AUTHOR_DATE=%s 12:00:00", dateStr),
-		fmt.Sprintf("GIT_COMMITTER_DATE=%s 12:00:00", dateStr),
+		fmt.Sprintf("GIT_AUTHOR_DATE=%s 12:00:00", commit.Date),
+		fmt.Sprintf("GIT_COMMITTER_DATE=%s 12:00:00", commit.Date),
 	)
 
 	// Add all changes
-	addCmd := exec.Command("git", "add", "contribution.txt")
-	if err := addCmd.Run(); err != nil {
-		return fmt.Errorf("failed to git add: %w", err)
+	for _, file := range commit.Files {
+		addCmd := exec.Command("git", "add", file)
+		if err := addCmd.Run(); err != nil {
+			return fmt.Errorf("failed to git add file: %s:  Error: %w", file, err)
+		}
 	}
 
 	// Make the commit
-	commitCmd := exec.Command("git", "commit", "-m", fmt.Sprintf("contribution: %s", dateStr))
+	commitCmd := exec.Command("git", "commit", "-m", commit.Message)
 	commitCmd.Env = env
 	if err := commitCmd.Run(); err != nil {
 		return fmt.Errorf("failed to git commit: %w", err)
