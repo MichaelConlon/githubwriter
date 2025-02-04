@@ -36,11 +36,7 @@ func FindFilesByExtension(extensions string, dir string) ([]string, error) {
 			if err != nil {
 				return nil, fmt.Errorf("failed to find files in directory: %s\nError: %w", file.Name(), err)
 			}
-			pathedDirFiles := []string{}
-			for _, dirFile := range dirFiles {
-				pathedDirFiles = append(pathedDirFiles, filepath.Join(dir, dirFile))
-			}
-			matchedFiles = append(matchedFiles, pathedDirFiles...) // add all files from directory to matched files
+			matchedFiles = append(matchedFiles, dirFiles...) // add all files from directory to matched files
 		}
 		// Get extention of file and check if it is in the list of allowed extensions
 		parts := strings.Split(file.Name(), ".")
@@ -48,7 +44,7 @@ func FindFilesByExtension(extensions string, dir string) ([]string, error) {
 			ext := parts[len(parts)-1]
 			for _, allowedExt := range extensionsList {
 				if ext == allowedExt {
-					matchedFiles = append(matchedFiles, file.Name())
+					matchedFiles = append(matchedFiles, filepath.Join(dir, file.Name()))
 					break
 				}
 			}
