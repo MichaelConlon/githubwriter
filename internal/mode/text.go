@@ -393,10 +393,12 @@ func Text(args types.TextArgs, dryrun bool) {
 	}
 
 	// Create file if not exists
-	err := system.WriteFile("contribution.txt", "")
-	if err != nil {
-		fmt.Printf("Error: failed to create contribution file: %s\n", err)
-		os.Exit(1)
+	if !dryrun {
+		err := system.WriteFile("contribution.txt", "")
+		if err != nil {
+			fmt.Printf("Error: failed to create contribution file: %s\n", err)
+			os.Exit(1)
+		}
 	}
 
 	commitDate := findFirstCommitDate(&args)

@@ -11,7 +11,40 @@ import (
 	types "github.com/MichaelConlon/githubwriter/internal/types"
 )
 
-func handleWorkFlags(args types.WorkArgs) bool {
+var commitMessages = []string{
+	"feat(auth): implement JWT authentication middleware",
+	"feat(database): add user preferences table migration",
+	"feat(api): create endpoint for batch processing orders",
+	"fix(cache): resolve Redis connection timeout issue",
+	"perf(query): optimize user search with database indexing",
+	"refactor(middleware): simplify error handling logic",
+	"test(auth): add unit tests for password hashing",
+	"security(api): implement rate limiting for public endpoints",
+	"fix(logging): handle concurrent write operations to log files",
+	"feat(queue): implement message broker for async tasks",
+	"feat(ui): add responsive navigation drawer component",
+	"fix(layout): resolve overflow issues in mobile view",
+	"style(theme): update primary color palette",
+	"perf(rendering): implement virtual scrolling for large lists",
+	"feat(auth): add biometric authentication option",
+	"fix(forms): validate phone numbers before submission",
+	"a11y(buttons): improve screen reader compatibility",
+	"feat(state): implement Redux toolkit for user settings",
+	"perf(bundle): reduce main bundle size by code splitting",
+	"style(components): standardize button styling across app",
+	"ci(pipeline): configure GitHub Actions workflow",
+	"build(docker): optimize container layer caching",
+	"docs(api): update OpenAPI documentation",
+	"chore(deps): update dependencies to latest versions",
+	"feat(monitoring): integrate Prometheus metrics",
+	"test(e2e): add Cypress tests for checkout flow",
+	"security(deps): patch vulnerable dependencies",
+	"refactor(config): centralize environment variables",
+	"perf(cdn): implement asset caching strategy",
+	"docs(readme): update deployment instructions",
+}
+
+func handleWorkFlags() bool {
 	valid := true
 
 	return valid
@@ -40,11 +73,15 @@ func craftCommit(args types.WorkArgs, files []string) types.Commit {
 	// Set ticket if provided
 	if args.Ticket != "" {
 		commit.Ticket = args.Ticket
+	} else {
+		commit.Ticket = fmt.Sprintf("[%d]", rand.Intn(10000))
 	}
 
 	// Set message if provided
 	if args.Message != "" {
 		commit.Message = args.Message
+	} else {
+		commit.Message = commitMessages[rand.Intn(len(commitMessages))]
 	}
 
 	commit.Files = files
@@ -53,7 +90,7 @@ func craftCommit(args types.WorkArgs, files []string) types.Commit {
 }
 
 func Work(args types.WorkArgs) {
-	if !handleWorkFlags(args) {
+	if !handleWorkFlags() {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -73,6 +110,16 @@ func Work(args types.WorkArgs) {
 		files = files[:args.NumFiles]
 	}
 
+	// Change file whitespace to create a change
+	for _, file := range files {
+		err := system.AddRemoveNewLine(file)
+		if err != nil {
+			fmt.Printf("Error: %s\n", err)
+			os.Exit(1)
+		}
+	}
+
+	// Craft commit
 	commit := craftCommit(args, files)
 
 	fmt.Printf("Commit: %+v\n", commit)

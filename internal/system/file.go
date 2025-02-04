@@ -36,7 +36,11 @@ func FindFilesByExtension(extensions string, dir string) ([]string, error) {
 			if err != nil {
 				return nil, fmt.Errorf("failed to find files in directory: %s\nError: %w", file.Name(), err)
 			}
-			matchedFiles = append(matchedFiles, dirFiles...) // add all files from directory to matched files
+			pathedDirFiles := []string{}
+			for _, dirFile := range dirFiles {
+				pathedDirFiles = append(pathedDirFiles, filepath.Join(dir, dirFile))
+			}
+			matchedFiles = append(matchedFiles, pathedDirFiles...) // add all files from directory to matched files
 		}
 		// Get extention of file and check if it is in the list of allowed extensions
 		parts := strings.Split(file.Name(), ".")
@@ -51,4 +55,30 @@ func FindFilesByExtension(extensions string, dir string) ([]string, error) {
 		}
 	}
 	return matchedFiles, nil
+}
+
+func AddRemoveNewLine(filename string) error {
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
+	}
+
+	// Add a new line to the end of the file if it doesn't already end with a newline
+	if !strings.HasSuffix(string(content), "\n") {
+		content = append(content, '\n')
+		err = os.WriteFile(filename, content, 0644)
+		if err != nil {
+			return fmt.Errorf("failed to write file: %w", err)
+		}
+	}
+
+	// Remove a new line from the end of the file if it already ends with a newline
+	if strings.HasSuffix(string(content), "\n") {
+		content = content[:len(content)-1]
+		err = os.WriteFile(filename, content, 0644)
+		if err != nil {
+			return fmt.Errorf("failed to write file: %w", err)
+		}
+	}
+	return nil
 }
