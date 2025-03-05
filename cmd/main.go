@@ -26,6 +26,7 @@ func main() {
 	flag.StringVar(&cfg.WorkArgs.Extensions, "extensions", "", "work mode only - file extensions to be used for the commit")
 	flag.IntVar(&cfg.WorkArgs.NumFiles, "num-files", 0, "work mode only - number of files to be used for the commit - 0 or not provided will use all files")
 	flag.StringVar(&cfg.WorkArgs.Files, "files", "", "work mode only - comma separated list of files to be used for the commit")
+	flag.StringVar(&cfg.WorkArgs.LintConfig, "lint-config", "", "work mode only - path to the eslint config file")
 
 	// Parse command line arguments
 	flag.Parse()

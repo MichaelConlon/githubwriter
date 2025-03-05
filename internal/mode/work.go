@@ -114,11 +114,19 @@ func Work(args types.WorkArgs, dryrun bool) {
 
 	if !dryrun {
 		// Change file whitespace to create a change
-		for _, file := range files {
-			err := system.AddRemoveNewLine(file)
+		if args.LintConfig != "" {
+			err := system.RunESLint(args.LintConfig, files)
 			if err != nil {
 				fmt.Printf("Error: %s\n", err)
 				os.Exit(1)
+			}
+		} else {
+			for _, file := range files {
+				err := system.AddRemoveNewLine(file)
+				if err != nil {
+					fmt.Printf("Error: %s\n", err)
+					os.Exit(1)
+				}
 			}
 		}
 

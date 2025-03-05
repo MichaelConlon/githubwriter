@@ -21,6 +21,7 @@ type WorkArgs struct {
 	Extensions string
 	NumFiles   int
 	Files      string
+	LintConfig string
 }
 
 type Commit struct {
