@@ -303,7 +303,10 @@ func writeLetter(char byte, commitDate time.Time, dryrun bool) time.Time {
 				if dryrun {
 					fmt.Printf("%c: %s\n", char, commitDate.Format("2006-01-02"))
 				} else {
-					system.Commit(createTextCommit(commitDate))
+					system.WriteFile("contribution.txt", fmt.Sprintf("%s\n", commitDate.Format("2006-01-02")))
+					if err := system.Commit(createTextCommit(commitDate)); err != nil {
+						fmt.Printf("Error creating commit for date %s: %v\n", commitDate.Format("2006-01-02"), err)
+					}
 				}
 				commitDate = commitDate.AddDate(0, 0, 1) // move date forward
 			}
