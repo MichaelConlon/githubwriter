@@ -20,6 +20,7 @@ type WorkArgs struct {
 	Message    string
 	Extensions string
 	NumFiles   int
+	Files      string
 }
 
 type Commit struct {

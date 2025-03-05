@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	system "github.com/MichaelConlon/githubwriter/internal/system"
@@ -101,8 +102,9 @@ func Work(args types.WorkArgs, dryrun bool) {
 		os.Exit(1)
 	}
 
-	// Randomly select NumFiles if specified
-	if args.NumFiles > 0 && args.NumFiles < len(files) {
+	if args.Files != "" { // Split files by comma
+		files = strings.Split(args.Files, ",")
+	} else if args.NumFiles > 0 && args.NumFiles < len(files) { // Randomly select NumFiles if specified
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		r.Shuffle(len(files), func(i, j int) {
 			files[i], files[j] = files[j], files[i]
