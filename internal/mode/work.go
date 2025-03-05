@@ -122,5 +122,8 @@ func Work(args types.WorkArgs) {
 	// Craft commit
 	commit := craftCommit(args, files)
 
-	fmt.Printf("Commit: %+v\n", commit)
+	if err := system.Commit(commit); err != nil {
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
+	}
 }
