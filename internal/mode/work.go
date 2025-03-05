@@ -89,7 +89,7 @@ func craftCommit(args types.WorkArgs, files []string) types.Commit {
 	return commit
 }
 
-func Work(args types.WorkArgs) {
+func Work(args types.WorkArgs, dryrun bool) {
 	if !handleWorkFlags() {
 		flag.Usage()
 		os.Exit(1)
@@ -110,20 +110,42 @@ func Work(args types.WorkArgs) {
 		files = files[:args.NumFiles]
 	}
 
-	// Change file whitespace to create a change
-	for _, file := range files {
-		err := system.AddRemoveNewLine(file)
-		if err != nil {
+	if !dryrun {
+		// Change file whitespace to create a change
+		for _, file := range files {
+			err := system.AddRemoveNewLine(file)
+			if err != nil {
+				fmt.Printf("Error: %s\n", err)
+				os.Exit(1)
+			}
+		}
+
+		// Craft commit
+		commit := craftCommit(args, files)
+
+		for _, file := range commit.Files {
+			fmt.Printf("    - %s\n", file)
+		}
+
+		if err := system.Commit(commit); err != nil {
 			fmt.Printf("Error: %s\n", err)
 			os.Exit(1)
 		}
-	}
+	} else {
+		commit := craftCommit(args, files)
 
-	// Craft commit
-	commit := craftCommit(args, files)
+		fmt.Printf("Commit Details:\n"+
+			"  Date: %s\n"+
+			"  Ticket: %s\n"+
+			"  Message: %s\n"+
+			"  Files (%d):\n",
+			commit.Date,
+			commit.Ticket,
+			commit.Message,
+			len(commit.Files))
 
-	if err := system.Commit(commit); err != nil {
-		fmt.Printf("Error: %s\n", err)
-		os.Exit(1)
+		for _, file := range commit.Files {
+			fmt.Printf("    - %s\n", file)
+		}
 	}
 }

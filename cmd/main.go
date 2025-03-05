@@ -45,7 +45,7 @@ func main() {
 		mode.Text(cfg.TextArgs, cfg.DryRun)
 	case "work":
 		fmt.Println("Work mode selected")
-		mode.Work(cfg.WorkArgs)
+		mode.Work(cfg.WorkArgs, cfg.DryRun)
 	default:
 		fmt.Printf("Error: unknown mode '%s'\n", cfg.Mode)
 		os.Exit(1)
