@@ -21,6 +21,12 @@ A tool for creating custom GitHub contribution patterns by automating git commit
 go install github.com/MichaelConlon/githubwriter@latest
 ```
 
+to build the program into an executable file run: 
+```bash
+go build cmd/main.go
+```
+Move the executable file into the directory in which you intend to create the fake commits
+
 ## Usage
 
 ### Text Mode
